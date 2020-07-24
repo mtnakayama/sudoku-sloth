@@ -64,7 +64,7 @@ class Coord(NamedTuple):
             for x in range(3):
                 yield Coord(upper_left.x + x, upper_left.y + y)
 
-    def gen_surrounding(self) -> Iterable[Coord]:
+    def gen_neighbors(self) -> Iterable[Coord]:
         all_coords = chain(self.gen_row(), self.gen_col(),
                            self.gen_subregion())
         return filter(lambda x: x != self, set(all_coords))
@@ -114,7 +114,7 @@ class Board:
 
     @staticmethod
     def _forward_check(new_board: BoardData, coord: Coord, value: int):
-        for x, y in coord.gen_surrounding():
+        for x, y in coord.gen_neighbors():
             possible_values = new_board[y][x]
             try:
                 possible_values.discard(value)  # type: ignore

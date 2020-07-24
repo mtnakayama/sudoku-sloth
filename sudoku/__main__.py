@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import reduce
 import heapq
 import itertools
 from typing import (cast, Iterable, Iterator, List, NamedTuple, Optional, Set, Tuple,
@@ -27,6 +28,7 @@ def convert_puzzle(text: str):
 
 class MoveChoice(NamedTuple):
     score: int
+    neg_num_neighbors: int
     coord: Coord
 
 
@@ -35,7 +37,11 @@ def calculate_moves(board: Board) -> List[MoveChoice]:
     for coord, tile in board.gen_all_tiles():
         try:
             score = len(tile)
-            moves.append(MoveChoice(score, coord))
+
+            num_neighbors = sum(map(lambda x: int(isinstance(board[x], set)),
+                                    coord.gen_neighbors()), 0)
+
+            moves.append(MoveChoice(score, -num_neighbors, coord))
         except TypeError:
             # tile is an int
             pass
@@ -47,11 +53,11 @@ def calculate_moves(board: Board) -> List[MoveChoice]:
 
 def refresh_move_scores(board: Board, moves: List[MoveChoice]) -> int:
     for i, move_opt in enumerate(moves):
-        _, coord = move_opt
+        _, neg_num_neighbors, coord = move_opt
 
         tile = board[coord]
         score = len(cast(Set[int], tile))
-        moves[i] = MoveChoice(score, coord)
+        moves[i] = MoveChoice(score, neg_num_neighbors, coord)
 
     heapq.heapify(moves)
     return moves[0].score
@@ -84,7 +90,7 @@ def solve(board: Board, next_moves: List[MoveChoice],
     print(heapq.nsmallest(10, next_moves))
 
     choice = heapq.heappop(next_moves)
-    _, coord = choice
+    coord = choice.coord
 
     possible_fills = cast(Set[int], board[coord])
     for fill in possible_fills:
