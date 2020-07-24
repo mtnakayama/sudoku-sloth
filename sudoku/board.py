@@ -2,10 +2,8 @@ from __future__ import annotations
 
 
 import copy
-from dataclasses import dataclass
 from itertools import chain
-from typing import (Iterable, Iterator, List, NamedTuple, Optional, Set, Tuple,
-                    Union)
+from typing import Iterable, Iterator, List, NamedTuple, Optional, Set, Union
 
 
 MAX_COORD = 10

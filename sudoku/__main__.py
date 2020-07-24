@@ -1,10 +1,7 @@
 from dataclasses import dataclass
-from functools import reduce
 import heapq
 import itertools
-from typing import (cast, Iterable, Iterator, List, NamedTuple, Optional, Set, Tuple,
-                    Union)
-
+from typing import cast, List, NamedTuple, Set
 
 from .board import Board, Coord, EmptyDomainError
 
@@ -108,7 +105,8 @@ def solve(board: Board, next_moves: List[MoveChoice],
 
 def main():
     # from https://qqwing.com/generate.html
-    puzzle = '.....37...7.....8624....1...6.......41..6..355.2....1..2.5...7.........385.7...4.'
+    puzzle = ('.....37...7.....8624....1...6.......41..6..355.2....1..2.5...7.'
+              '........385.7...4.')
 
     puzzle_matrix = convert_puzzle(puzzle)
 
@@ -117,6 +115,7 @@ def main():
     board = solve(board, calculate_moves(board))
 
     print(board)
+
 
 if __name__ == "__main__":
     main()
