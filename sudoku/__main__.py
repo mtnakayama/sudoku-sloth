@@ -1,10 +1,14 @@
 from dataclasses import dataclass
 import heapq
 import itertools
+import os
+import sys
 from typing import cast, List, NamedTuple, Set
 
 from .board import Board, Coord, EmptyDomainError
 
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
 
 def grouper(n, iterable, fillvalue=None):
     "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
@@ -71,23 +75,26 @@ def solve(board: Board, next_moves: List[MoveChoice],
           _depth=0, _stats: SolutionStats = None) -> Board:
 
     if not next_moves:
+        print(_stats)
         return board
 
     if not _stats:
         _stats = SolutionStats()
 
-    _depth += 1
-    _stats.iteration += 1
-
     if next_moves[0].score > _stats.min_score:
         refresh_move_scores(board, next_moves)
 
-    print(board)
-    print(_stats)
-    print(heapq.nsmallest(10, next_moves))
+    if _stats.iteration % 10 == 0:
+        cls()
+        print(board)
+        print(_stats)
+        print(heapq.nsmallest(10, next_moves))
 
     choice = heapq.heappop(next_moves)
     coord = choice.coord
+
+    _depth += 1
+    _stats.iteration += 1
 
     possible_fills = cast(Set[int], board[coord])
     for fill in possible_fills:
@@ -98,19 +105,25 @@ def solve(board: Board, next_moves: List[MoveChoice],
         except EmptyDomainError:
             pass
 
-    heapq.heappush(next_moves, choice)
+    heapq.heappush(next_moves, MoveChoice(choice.score + 10,
+                                          choice.neg_num_neighbors, coord))
 
     raise EmptyDomainError(f"No valid moves for {coord} {board[coord]}")
 
 
 def main():
     # from https://qqwing.com/generate.html
-    puzzle = ('.....37...7.....8624....1...6.......41..6..355.2....1..2.5...7.'
-              '........385.7...4.')
+    try:
+        puzzle = sys.argv[1]
+    except IndexError:
+        puzzle = ('.....37...7.....8624....1...6.......41..6..355.2....1..2.5'
+                  '...7.........385.7...4.')
 
     puzzle_matrix = convert_puzzle(puzzle)
 
     board = Board(data=puzzle_matrix)
+    print(board)
+    input("Press any key to continue")
 
     board = solve(board, calculate_moves(board))
 
